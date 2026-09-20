@@ -1,0 +1,44 @@
+{
+  "name": "taskflow-docker-api",
+  "version": "1.0.0",
+  "description": "Production-ready containerized REST API with PostgreSQL, Redis, and Nginx reverse proxy",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "test": "jest --detectOpenHandles --forceExit",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "docker",
+    "nodejs",
+    "typescript",
+    "express",
+    "postgres",
+    "redis",
+    "nginx"
+  ],
+  "author": "mahmoud",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "pg": "^8.13.3",
+    "redis": "^4.7.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.13.9",
+    "@types/pg": "^8.11.11",
+    "@types/supertest": "^6.0.2",
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.6",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}
