@@ -1,0 +1,11 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    command: npm run dev
+    volumes:
+      - ./src:/app/src
+    environment:
+      - NODE_ENV=development
