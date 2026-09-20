@@ -1,9 +1,5 @@
 version: '3.8'
 
-# Default Master Entrypoint: Nginx Web Server + Monitoring Stack
-# To run WordPress Stack instead, execute:
-#   docker compose -f docker-compose.wordpress.yml up -d
-
 services:
   nginx_server:
     image: nginx:alpine
@@ -19,7 +15,7 @@ services:
       timeout: 5s
       retries: 3
     networks:
-      - monitoring_net
+      - nginx_monitoring_net
     restart: unless-stopped
 
   nginx_exporter:
@@ -33,28 +29,28 @@ services:
       nginx_server:
         condition: service_healthy
     networks:
-      - monitoring_net
+      - nginx_monitoring_net
     restart: unless-stopped
 
   prometheus:
     image: prom/prometheus:v2.51.0
-    container_name: taskflow_prometheus
+    container_name: taskflow_prometheus_nginx
     ports:
       - "9090:9090"
     volumes:
       - ./docker/prometheus/prometheus-nginx.yml:/etc/prometheus/prometheus.yml:ro
       - ./docker/prometheus/alert.rules.nginx.yml:/etc/prometheus/alert.rules.nginx.yml:ro
-      - prometheus_data:/prometheus
+      - prometheus_nginx_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
     networks:
-      - monitoring_net
+      - nginx_monitoring_net
     restart: unless-stopped
 
   alertmanager:
     image: prom/alertmanager:v0.27.0
-    container_name: taskflow_alertmanager
+    container_name: taskflow_alertmanager_nginx
     ports:
       - "9093:9093"
     volumes:
@@ -62,12 +58,12 @@ services:
     command:
       - '--config.file=/etc/alertmanager/alertmanager.yml'
     networks:
-      - monitoring_net
+      - nginx_monitoring_net
     restart: unless-stopped
 
   grafana:
     image: grafana/grafana:10.4.0
-    container_name: taskflow_grafana
+    container_name: taskflow_grafana_nginx
     ports:
       - "3001:3000"
     environment:
@@ -76,15 +72,15 @@ services:
       - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/nginx-dashboard.json
     volumes:
       - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
-      - grafana_data:/var/lib/grafana
+      - grafana_nginx_data:/var/lib/grafana
     networks:
-      - monitoring_net
+      - nginx_monitoring_net
     restart: unless-stopped
 
 networks:
-  monitoring_net:
+  nginx_monitoring_net:
     driver: bridge
 
 volumes:
-  prometheus_data:
-  grafana_data:
+  prometheus_nginx_data:
+  grafana_nginx_data:

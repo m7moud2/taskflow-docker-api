@@ -1,0 +1,20 @@
+groups:
+  - name: wordpress_mysql_alerts
+    rules:
+      - alert: MySQLDown
+        expr: mysql_up == 0
+        for: 10s
+        labels:
+          severity: critical
+        annotations:
+          summary: "MySQL Database is Down!"
+          description: "MySQL database server exporter on {{ $labels.instance }} is reporting down status."
+
+      - alert: MySQLHighConnections
+        expr: mysql_global_status_threads_connected > 100
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Active MySQL Connections"
+          description: "MySQL threads connected exceeded 100 on {{ $labels.instance }}."

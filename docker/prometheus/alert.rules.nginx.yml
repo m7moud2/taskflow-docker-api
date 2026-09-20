@@ -1,0 +1,20 @@
+groups:
+  - name: nginx_alerts
+    rules:
+      - alert: NginxDown
+        expr: nginx_up == 0
+        for: 10s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Nginx Web Server is down!"
+          description: "Nginx web server exporter is reporting down status on instance {{ $labels.instance }}."
+
+      - alert: NginxHighConnections
+        expr: nginx_connections_active > 1000
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Active Connections on Nginx"
+          description: "Nginx active connections exceeded 1000 on {{ $labels.instance }}."

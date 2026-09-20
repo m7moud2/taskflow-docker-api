@@ -1,0 +1,38 @@
+groups:
+  - name: taskflow_alerts
+    rules:
+      - alert: TaskflowAppDown
+        expr: up{job="taskflow_app"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "TaskFlow Node.js Express API Container is Down"
+          description: "The taskflow_app target has been unresponsive for more than 30 seconds."
+
+      - alert: DatabaseDown
+        expr: taskflow_database_up == 0
+        for: 15s
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL Database Connection Failed"
+          description: "The Express API is unable to reach PostgreSQL database."
+
+      - alert: RedisCacheDown
+        expr: taskflow_redis_up == 0
+        for: 15s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis RAM Cache Connection Failed"
+          description: "Redis is down. System is operating in Failover mode (Direct DB queries)."
+
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes > 300000000
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Memory Utilization Detected"
+          description: "TaskFlow process memory RSS exceeds 300 MB."

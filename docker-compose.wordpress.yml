@@ -1,0 +1,114 @@
+version: '3.8'
+
+services:
+  mysql_db:
+    image: mysql:8.0
+    container_name: taskflow_mysql_db
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: wordpress_db
+      MYSQL_USER: wordpress_user
+      MYSQL_PASSWORD: wordpress_password
+    volumes:
+      - mysql_wp_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-proot_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - wp_monitoring_net
+    restart: unless-stopped
+
+  wordpress:
+    image: wordpress:latest
+    container_name: taskflow_wordpress
+    ports:
+      - "8000:80"
+    environment:
+      WORDPRESS_DB_HOST: mysql_db:3306
+      WORDPRESS_DB_USER: wordpress_user
+      WORDPRESS_DB_PASSWORD: wordpress_password
+      WORDPRESS_DB_NAME: wordpress_db
+    volumes:
+      - wordpress_wp_data:/var/www/html
+    depends_on:
+      mysql_db:
+        condition: service_healthy
+    networks:
+      - wp_monitoring_net
+    restart: unless-stopped
+
+  mysqld_exporter:
+    image: prom/mysqld-exporter:v0.15.1
+    container_name: taskflow_mysqld_exporter
+    ports:
+      - "9104:9104"
+    command:
+      - --mysqld.address=mysql_db:3306
+      - --mysqld.username=wordpress_user
+    environment:
+      - MYSQLD_EXPORTER_PASSWORD=wordpress_password
+    depends_on:
+      mysql_db:
+        condition: service_healthy
+    networks:
+      - wp_monitoring_net
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: taskflow_prometheus_wp
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus-wordpress.yml:/etc/prometheus/prometheus.yml:ro
+      - ./docker/prometheus/alert.rules.wordpress.yml:/etc/prometheus/alert.rules.wordpress.yml:ro
+      - prometheus_wp_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - wp_monitoring_net
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: taskflow_alertmanager_wp
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./docker/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+    networks:
+      - wp_monitoring_net
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:10.4.0
+    container_name: taskflow_grafana_wp
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin_secret
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/wordpress-dashboard.json
+    volumes:
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_wp_data:/var/lib/grafana
+    networks:
+      - wp_monitoring_net
+    restart: unless-stopped
+
+networks:
+  wp_monitoring_net:
+    driver: bridge
+
+volumes:
+  mysql_wp_data:
+  wordpress_wp_data:
+  prometheus_wp_data:
+  grafana_wp_data:
