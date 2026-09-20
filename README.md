@@ -1,107 +1,91 @@
-# 🚀 DevOps Observability & Monitoring Platform
+# taskflow-monitoring
 
-A production-grade DevOps monitoring and alerting stack powered by **Prometheus**, **Grafana**, and **Alertmanager**.
+DevOps observability environment with Prometheus, Grafana, and Alertmanager.
 
-This repository provides two independent, modular environments:
-1. **🌐 Nginx Web Server Monitoring Stack**: Standalone Nginx web server with `/stub_status` metrics and Nginx Prometheus Exporter.
-2. **📝 WordPress & MySQL Monitoring Stack**: WordPress CMS with MySQL 8.0 database and MySQL Prometheus Exporter.
+Supports two isolated Docker Compose stacks:
+- Nginx Web Server with `stub_status` metrics exporter
+- WordPress with MySQL 8.0 database exporter
 
----
-
-## 🗂️ Repository Architecture
+## Stack Architecture
 
 ```
-docker-work/
-├── docker-compose.yml              # Default entrypoint (Nginx Monitoring Stack)
-├── docker-compose.nginx.yml        # Nginx Standalone Monitoring Stack
-├── docker-compose.wordpress.yml    # WordPress & MySQL 8.0 Monitoring Stack
+.
+├── docker-compose.yml              # Default entrypoint (Nginx stack)
+├── docker-compose.nginx.yml        # Nginx monitoring stack
+├── docker-compose.wordpress.yml    # WordPress & MySQL monitoring stack
 ├── nginx/
-│   └── nginx.conf                  # Nginx configuration with /stub_status enabled
+│   └── nginx.conf                  # Nginx stub_status config
 ├── docker/
 │   ├── prometheus/
-│   │   ├── prometheus-nginx.yml    # Prometheus scrape config for Nginx
-│   │   ├── prometheus-wordpress.yml# Prometheus scrape config for WordPress & MySQL
-│   │   ├── alert.rules.nginx.yml   # Prometheus alert rules for Nginx
-│   │   └── alert.rules.wordpress.yml# Prometheus alert rules for MySQL
+│   │   ├── prometheus-nginx.yml
+│   │   ├── prometheus-wordpress.yml
+│   │   ├── alert.rules.nginx.yml
+│   │   └── alert.rules.wordpress.yml
 │   ├── alertmanager/
-│   │   └── alertmanager.yml        # Alertmanager routing configuration
+│   │   └── alertmanager.yml
 │   └── grafana/
 │       └── provisioning/
 │           ├── datasources/
-│           │   └── prometheus.yml  # Automated Grafana Prometheus datasource
+│           │   └── prometheus.yml
 │           └── dashboards/
-│               ├── dashboards.yml  # Automated dashboard provider
-│               ├── nginx-dashboard.json     # Pre-configured Nginx metrics dashboard
-│               └── wordpress-dashboard.json # Pre-configured MySQL/WordPress dashboard
-├── scripts/
-│   ├── health-check.sh             # Operational monitoring health check script
-│   └── chaos-test.sh               # Failover and Alertmanager testing script
-└── .github/
-    └── workflows/
-        └── ci.yml                  # GitHub Actions CI pipeline
+│               ├── dashboards.yml
+│               ├── nginx-dashboard.json
+│               └── wordpress-dashboard.json
+└── scripts/
+    ├── health-check.sh             # Health check script
+    └── chaos-test.sh               # Failover testing script
 ```
 
----
+## Quick Start
 
-## ⚡ Quick Start Guide
+### 1. Nginx Monitoring Stack
 
-### Option 1: Launch Nginx Monitoring Stack
+Run Nginx web server with Prometheus, Grafana, and Alertmanager:
+
 ```bash
 docker compose -f docker-compose.nginx.yml up -d
 ```
-*(Or run `docker compose up -d` for the default stack)*
 
-#### Endpoints & Services:
-* 🌐 **Nginx Web Server:** [http://localhost](http://localhost)
-* 📈 **Grafana Dashboard:** [http://localhost:3001](http://localhost:3001)
-* 🚨 **Alertmanager UI:** [http://localhost:9093](http://localhost:9093)
-* 📊 **Prometheus UI:** [http://localhost:9090](http://localhost:9090)
-* ⚙️ **Nginx Exporter Metrics:** [http://localhost:9113/metrics](http://localhost:9113/metrics)
+Endpoints:
+- Nginx: http://localhost
+- Grafana: http://localhost:3001
+- Prometheus: http://localhost:9090
+- Alertmanager: http://localhost:9093
+- Nginx Exporter: http://localhost:9113/metrics
 
----
+### 2. WordPress & MySQL Monitoring Stack
 
-### Option 2: Launch WordPress & MySQL Monitoring Stack
+Run WordPress, MySQL 8.0, and `mysqld-exporter`:
+
 ```bash
 docker compose -f docker-compose.wordpress.yml up -d
 ```
 
-#### Endpoints & Services:
-* 📝 **WordPress Site:** [http://localhost:8000](http://localhost:8000)
-* 📈 **Grafana Dashboard:** [http://localhost:3001](http://localhost:3001)
-* 🚨 **Alertmanager UI:** [http://localhost:9093](http://localhost:9093)
-* 📊 **Prometheus UI:** [http://localhost:9090](http://localhost:9090)
-* ⚙️ **MySQL Exporter Metrics:** [http://localhost:9104/metrics](http://localhost:9104/metrics)
+Endpoints:
+- WordPress: http://localhost:8000
+- Grafana: http://localhost:3001
+- Prometheus: http://localhost:9090
+- Alertmanager: http://localhost:9093
+- MySQL Exporter: http://localhost:9104/metrics
 
----
+## Operational Scripts
 
-## 🧪 Operational Scripts & Testing
-
-### Infrastructure Health Check
-Run the automated health checker to verify endpoint connectivity:
+Run health check across endpoints:
 ```bash
 ./scripts/health-check.sh
 ```
 
-### Chaos Engineering & Alert Testing
-Test Alertmanager alert firing and failover routing:
+Simulate service failover and test Alertmanager alerts:
 ```bash
-# Test Nginx Failover
 ./scripts/chaos-test.sh nginx
-
-# Test WordPress / MySQL Failover
 ./scripts/chaos-test.sh wordpress
 ```
 
----
+## Cleanup
 
-## 🛑 Tear Down Environment
+Stop containers and remove volumes:
 
-To stop and remove containers and volumes for Nginx:
 ```bash
 docker compose -f docker-compose.nginx.yml down -v
-```
-
-To stop and remove containers and volumes for WordPress:
-```bash
 docker compose -f docker-compose.wordpress.yml down -v
 ```
