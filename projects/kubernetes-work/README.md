@@ -1,142 +1,84 @@
-# Kubernetes Work - لاب Kubernetes للمبتدئين
+# Kubernetes Work
 
-تاسك عملي صغير لتعلّم أساسيات Kubernetes عن طريق تشغيل صفحة Nginx محلية، ثم فحصها وتوسعتها وتحديثها.
+A beginner lab for deploying and managing a simple Nginx site on Kubernetes.
 
-## هتتعلم إيه؟
+## Requirements
 
-- Namespace لعزل موارد التطبيق.
-- ConfigMap لتقديم صفحة HTML مخصصة.
-- Deployment لتشغيل وإدارة نسخ التطبيق.
-- Service لربط التطبيق داخل الـcluster.
-- فحص الـPods والـlogs والـevents.
-- التوسعة وتحديث التطبيق والتأكد من تعافي Kubernetes عند حذف Pod.
+- Docker Desktop with Kubernetes enabled, or Minikube
+- `kubectl`
+- An internet connection to download the Nginx image
 
-## المتطلبات
-
-- Docker Desktop على macOS أو Windows، أو Docker على Linux.
-- Kubernetes cluster محلي واحد من الاختيارات التالية:
-  - Kubernetes المدمج في Docker Desktop: افتح Docker Desktop ثم **Settings > Kubernetes > Enable Kubernetes** وانتظر حتى تصبح الحالة جاهزة.
-  - Minikube: ثبّت Minikube و`kubectl` حسب [دليل Minikube الرسمي](https://minikube.sigs.k8s.io/docs/start/)، ثم شغّل `minikube start`.
-- مساحة إنترنت عند أول تشغيل لتنزيل صورة Nginx.
-
-تأكد أن `kubectl` متصل بالـcluster:
+Check that your cluster is running:
 
 ```bash
-kubectl config current-context
 kubectl cluster-info
 ```
 
-لو اخترت Minikube، تأكد أنه يعمل:
+For Minikube, start the cluster first:
 
 ```bash
-minikube status
+minikube start
 ```
 
-## تشغيل التask
+## Run the app
 
-من جذر المستودع:
+From the repository root:
 
 ```bash
 cd projects/kubernetes-work
 kubectl apply -f k8s/
-kubectl get all -n kubernetes-work
-```
-
-انتظر حتى تصبح نسختا التطبيق جاهزتين:
-
-```bash
 kubectl rollout status deployment/web -n kubernetes-work
-kubectl get pods -n kubernetes-work
-```
-
-افتح التطبيق محليًا باستخدام port-forward:
-
-```bash
 kubectl port-forward service/web 8080:80 -n kubernetes-work
 ```
 
-اترك الأمر يعمل، وافتح <http://localhost:8080>. لإيقاف الاتصال اضغط `Ctrl+C` في نفس الطرفية. الـService هنا من نوع `ClusterIP`؛ هذا اللاب لا يفتح الخدمة على الإنترنت.
+Open [http://localhost:8080](http://localhost:8080). Stop port forwarding with `Ctrl+C`.
 
-## التمارين
+## Practice
 
-نفّذ التمارين بالترتيب:
+List the app resources:
 
-1. افحص الموارد والعناوين:
+```bash
+kubectl get all -n kubernetes-work
+```
 
-   ```bash
-   kubectl get namespace kubernetes-work
-   kubectl get deployment,replicaset,pods,service -n kubernetes-work -o wide
-   ```
+Scale the app to three replicas:
 
-2. اعرف لماذا Pod معيّن يعمل أو يفشل، واستعرض سجلاته:
+```bash
+kubectl scale deployment/web --replicas=3 -n kubernetes-work
+kubectl get pods -n kubernetes-work
+```
 
-   ```bash
-   kubectl describe pod -l app=kubernetes-work-web -n kubernetes-work
-   kubectl logs deployment/web -n kubernetes-work
-   kubectl get events -n kubernetes-work --sort-by=.metadata.creationTimestamp
-   ```
+Delete one Pod and watch Kubernetes replace it:
 
-3. وسّع التطبيق إلى 3 نسخ، وتأكد أن كل النسخ جاهزة:
+```bash
+kubectl get pods -n kubernetes-work
+kubectl delete pod <pod-name> -n kubernetes-work
+kubectl get pods --watch -n kubernetes-work
+```
 
-   ```bash
-   kubectl scale deployment/web --replicas=3 -n kubernetes-work
-   kubectl get pods -n kubernetes-work
-   ```
+Update the Nginx image:
 
-4. اعرض أسماء الـPods:
+```bash
+kubectl set image deployment/web nginx=nginx:1.28-alpine -n kubernetes-work
+kubectl rollout status deployment/web -n kubernetes-work
+```
 
-   ```bash
-   kubectl get pods -l app=kubernetes-work-web -n kubernetes-work
-   ```
+Change the page in `k8s/10-configmap.yaml`, then apply the change:
 
-   احذف اسم Pod واحد من النتيجة بدلًا من `<pod-name>`، ثم راقب Deployment وهو ينشئ بديلًا تلقائيًا:
+```bash
+kubectl apply -f k8s/10-configmap.yaml
+kubectl rollout restart deployment/web -n kubernetes-work
+```
 
-   ```bash
-   kubectl delete pod <pod-name> -n kubernetes-work --wait=false
-   kubectl get pods -n kubernetes-work --watch
-   ```
+## Files
 
-   أوقف متابعة `--watch` باستخدام `Ctrl+C`.
+- `00-namespace.yaml` creates the lab namespace
+- `10-configmap.yaml` contains the web page
+- `20-deployment.yaml` runs two Nginx Pods
+- `30-service.yaml` provides an internal address for the Pods
 
-5. حدّث صورة Nginx وتابع عملية التحديث:
-
-   ```bash
-   kubectl set image deployment/web nginx=nginx:1.28-alpine -n kubernetes-work
-   kubectl rollout status deployment/web -n kubernetes-work
-   kubectl get deployment/web -n kubernetes-work
-   ```
-
-6. **تحدي اختياري:** عدّل `k8s/10-configmap.yaml` لتغيير نص الصفحة، ثم طبّق التغيير وتأكد من ظهوره في المتصفح:
-
-   ```bash
-   kubectl apply -f k8s/10-configmap.yaml
-   kubectl rollout restart deployment/web -n kubernetes-work
-   kubectl rollout status deployment/web -n kubernetes-work
-   ```
-
-## معاني الملفات
-
-- `00-namespace.yaml`: مساحة أسماء مستقلة للاب.
-- `10-configmap.yaml`: محتوى الصفحة التي يعرضها Nginx.
-- `20-deployment.yaml`: نسختان من Nginx مع readiness probe وموارد CPU/RAM محددة.
-- `30-service.yaml`: عنوان داخلي ثابت يوجّه الطلبات إلى نسخ التطبيق الجاهزة.
-
-## التنظيف
-
-احذف موارد اللاب بعد الانتهاء:
+## Clean up
 
 ```bash
 kubectl delete -f k8s/
 ```
-
-أو احذف الـNamespace بالكامل:
-
-```bash
-kubectl delete namespace kubernetes-work
-```
-
-## ملاحظات
-
-- هذا لاب تعليمي محلي، وليس إعدادًا إنتاجيًا.
-- لا يحتاج المشروع إلى تطبيق Node.js أو SQL Server؛ الهدف هنا تعلّم أساسيات Kubernetes أولًا.
-- بيانات الـConfigMap ليست مناسبة لتخزين كلمات المرور أو الأسرار.
