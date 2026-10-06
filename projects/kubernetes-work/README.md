@@ -1,6 +1,6 @@
 # Kubernetes Work
 
-Four beginner tasks for learning Kubernetes by running and changing a small Nginx app.
+Ten beginner and early-intermediate tasks for learning Kubernetes by running and changing a small Nginx app.
 
 The app uses the same image-and-container ideas as Docker, with Kubernetes resources to manage it:
 
@@ -34,6 +34,38 @@ kubectl config use-context docker-desktop
 
 `kubectl` talks to the Kubernetes API. If it tries `http://localhost:8080` and connection is refused, the cluster is not running or the context is not configured. This is different from the app's `localhost:8080` address used later by `port-forward`.
 
+## Cluster add-ons
+
+The Docker Desktop cluster used for this lab has Traefik as an Ingress controller and Metrics Server for `kubectl top` and HPA exercises.
+
+Install Helm on macOS with Homebrew:
+
+```bash
+brew install helm
+```
+
+Install the local-only Traefik controller:
+
+```bash
+helm repo add traefik https://traefik.github.io/charts
+helm repo update traefik
+helm upgrade --install traefik traefik/traefik --version 41.6.1 \
+  --namespace ingress-system --create-namespace \
+  --set service.spec.type=ClusterIP
+```
+
+Install Metrics Server and allow it to read the self-signed kubelet certificates used by this local Docker Desktop cluster:
+
+```bash
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.9.0/components.yaml
+kubectl patch deployment metrics-server -n kube-system --type=json \
+  -p='[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"}]'
+kubectl rollout status deployment/metrics-server -n kube-system
+kubectl top nodes
+```
+
+`--kubelet-insecure-tls` disables kubelet certificate verification. It is only for this local learning cluster; do not copy it into a production cluster.
+
 ## Start the app
 
 Run these commands from the repository root:
@@ -52,14 +84,22 @@ kubectl port-forward service/web 8080:80 -n kubernetes-work
 
 Keep that command running and open <http://localhost:8080>. Stop port forwarding with `Ctrl+C`.
 
-## The four tasks
+## The tasks
 
-Complete these in order. Each task builds on the previous one.
+Complete these in order. The first four cover the basics. Tasks five to ten build on them.
 
 1. [Inspect the app](tasks/01-inspect-the-app.md) — connect Docker images and containers to Kubernetes Pods and Deployments.
 2. [Change the web page](tasks/02-change-the-web-page.md) — update a ConfigMap and see how a Service reaches the app.
 3. [Scale and recover](tasks/03-scale-and-recover.md) — add replicas and watch a Deployment replace a deleted Pod.
 4. [Update and roll back](tasks/04-update-and-rollback.md) — change the Nginx image and undo a rollout.
+5. [Configuration and Secrets](tasks/05-configuration-and-secrets.md) — pass non-sensitive settings and a throwaway Secret to a container.
+6. [Probes and resources](tasks/06-probes-and-resources.md) — configure health checks and CPU and memory requests and limits.
+7. [Persistent storage](tasks/07-persistent-storage.md) — use a PVC to keep a file when its Pod is replaced.
+8. [Ingress and networking](tasks/08-ingress-and-networking.md) — route local HTTP traffic through Traefik to the app Service.
+9. [Helm basics](tasks/09-helm-basics.md) — create a chart, install it, upgrade it, and roll back a release.
+10. [Metrics and autoscaling](tasks/10-metrics-and-autoscaling.md) — inspect resource metrics, create an HPA, and optionally install Prometheus and Grafana.
+
+Tasks 8 and 10 use the local Ingress controller and Metrics Server installed on the Docker Desktop cluster. Task 10's Prometheus and Grafana section is optional and installs a larger monitoring stack.
 
 ## What each resource does
 
@@ -92,6 +132,17 @@ Delete only this lab's resources:
 
 ```bash
 kubectl delete -f projects/kubernetes-work/k8s/
+kubectl delete -f projects/kubernetes-work/tasks/manifests/
+kubectl delete secret app-credentials -n kubernetes-work --ignore-not-found
+helm uninstall demo-web -n kubernetes-work --ignore-not-found
 ```
 
-This does not remove Docker images, other Docker containers, or the Kubernetes cluster.
+If you installed the optional monitoring stack, remove it with `helm uninstall monitoring -n monitoring` and `kubectl delete namespace monitoring`. Remove the local Ingress controller and Metrics Server only if you no longer need them:
+
+```bash
+helm uninstall traefik -n ingress-system
+kubectl delete namespace ingress-system
+kubectl delete -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.9.0/components.yaml
+```
+
+This does not remove Docker images, other Docker containers, or the Kubernetes cluster. The PVC task's data is removed when its PVC is deleted.

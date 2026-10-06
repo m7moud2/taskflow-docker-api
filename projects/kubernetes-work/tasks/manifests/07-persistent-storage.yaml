@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: learning-data
+  namespace: kubernetes-work
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 256Mi
+  storageClassName: standard
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: storage-demo
+  namespace: kubernetes-work
+spec:
+  containers:
+    - name: demo
+      image: busybox:1.36.1
+      command: ["sh", "-c", "sleep 3600"]
+      volumeMounts:
+        - name: learning-data
+          mountPath: /data
+  volumes:
+    - name: learning-data
+      persistentVolumeClaim:
+        claimName: learning-data

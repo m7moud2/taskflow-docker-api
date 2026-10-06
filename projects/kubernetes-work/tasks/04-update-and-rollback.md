@@ -31,6 +31,8 @@ kubectl get deployment web -n kubernetes-work -o jsonpath='{.spec.template.spec.
 
 The Deployment returns to the previous Pod template and image.
 
+Because `kubectl set image` changes the live Deployment rather than the YAML file, a later `kubectl apply -f projects/kubernetes-work/k8s/20-deployment.yaml` will set the image back to the version declared in that file.
+
 ## Checkpoint
 
 - Which image tag is running after the rollback?
