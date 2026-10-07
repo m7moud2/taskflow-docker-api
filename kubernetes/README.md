@@ -2,6 +2,8 @@
 
 Ten hands-on tasks, from inspecting your first Deployment to using Helm and autoscaling.
 
+For a guided exercise that bridges image builds in Docker with Kubernetes deployments, see [Docker to Kubernetes](../docker/kubernetes-bridge/README.md).
+
 ## Start here
 
 You need Docker Desktop with Kubernetes enabled, `kubectl`, and an active `docker-desktop` context:

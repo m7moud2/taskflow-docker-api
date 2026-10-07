@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bridge-app
+  namespace: docker-kubernetes-bridge
+spec:
+  type: ClusterIP
+  selector:
+    app: bridge-app
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

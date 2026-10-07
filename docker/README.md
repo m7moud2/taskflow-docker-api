@@ -8,6 +8,7 @@ Each task has its own folder:
 2. [Nginx monitoring](tasks/02-nginx-monitoring/) — check Nginx, Prometheus, Grafana, and exporter metrics.
 3. [WordPress and MySQL](tasks/03-wordpress-and-mysql/) — start a separate WordPress stack with persistent volumes.
 4. [Health checks and failover](tasks/04-health-and-failover/) — use the scripts to check and test the stacks.
+5. [Docker to Kubernetes](kubernetes-bridge/) — build a small image, run it as a container, and deploy it to Kubernetes.
 
 The Docker Compose files remain at the repository root for compatibility with existing commands. Run commands from the repository root unless a task says otherwise.
 

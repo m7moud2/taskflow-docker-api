@@ -6,6 +6,7 @@ This repository contains two hands-on learning tracks. Start with Docker, then c
 
 - [Docker](docker/README.md) — Docker Compose, Nginx monitoring, WordPress and MySQL, and stack health checks.
 - [Kubernetes](kubernetes/README.md) — ten tasks covering workloads, configuration, storage, networking, Helm, and autoscaling.
+- [Docker to Kubernetes](docker/kubernetes-bridge/README.md) — build one image, run it with Docker, and deploy the same image to Kubernetes.
 
 Each task has its own folder with instructions. Docker's existing Compose files remain at the repository root so the current Docker setup and commands keep working. Kubernetes materials live under `kubernetes/`.
 
