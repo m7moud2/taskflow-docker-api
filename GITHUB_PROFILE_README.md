@@ -84,6 +84,7 @@
 - **Automated Provisioning:** Grafana datasources (`http://prometheus:9090`) and pre-loaded JSON dashboards with zero manual GUI setup.
 - **Alerting & Silencing:** Failover alert rules for service outages and Alertmanager silencing workflows for maintenance windows.
 - **Quality Assurance:** GitHub Actions CI verification pipeline, executable health check scripts, and failure injection testing.
+- **Learning Tracks:** Organized [Docker tasks](https://github.com/m7moud2/taskflow-docker-api/tree/main/docker) and a ten-task [Kubernetes track](https://github.com/m7moud2/taskflow-docker-api/tree/main/kubernetes), with each task in its own folder.
 
 ### 2. [Linux System Administration Labs](https://github.com/m7moud2/linux-system-administration-labs)
 *Automated Linux Server Administration, Process Monitoring, and Maintenance Scripts*

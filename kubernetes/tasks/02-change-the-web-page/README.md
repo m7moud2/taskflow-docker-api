@@ -14,12 +14,12 @@ Keep the command running and open <http://localhost:8080> in your browser.
 
 ## 2. Edit the ConfigMap
 
-Open `projects/kubernetes-work/k8s/10-configmap.yaml` and change the heading or paragraph inside `index.html`.
+Open `kubernetes/base/10-configmap.yaml` and change the heading or paragraph inside `index.html`.
 
 Apply the updated file:
 
 ```bash
-kubectl apply -f projects/kubernetes-work/k8s/10-configmap.yaml
+kubectl apply -f kubernetes/base/10-configmap.yaml
 kubectl rollout restart deployment/web -n kubernetes-work
 kubectl rollout status deployment/web -n kubernetes-work
 ```

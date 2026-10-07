@@ -7,7 +7,7 @@ Docker Desktop provides a local `standard` StorageClass for this exercise. Its d
 ## 1. Create the claim and Pod
 
 ```bash
-kubectl apply -f projects/kubernetes-work/tasks/manifests/07-persistent-storage.yaml
+kubectl apply -f kubernetes/tasks/07-persistent-storage/manifest.yaml
 kubectl get pvc,pod -n kubernetes-work
 kubectl wait --for=jsonpath='{.status.phase}'=Bound pvc/learning-data -n kubernetes-work --timeout=120s
 kubectl wait --for=condition=Ready pod/storage-demo -n kubernetes-work --timeout=120s
@@ -26,7 +26,7 @@ kubectl exec storage-demo -n kubernetes-work -- cat /data/hello.txt
 
 ```bash
 kubectl delete pod storage-demo -n kubernetes-work
-kubectl apply -f projects/kubernetes-work/tasks/manifests/07-persistent-storage.yaml
+kubectl apply -f kubernetes/tasks/07-persistent-storage/manifest.yaml
 kubectl wait --for=condition=Ready pod/storage-demo -n kubernetes-work --timeout=120s
 kubectl exec storage-demo -n kubernetes-work -- cat /data/hello.txt
 ```
@@ -38,7 +38,7 @@ The file remains because the new Pod mounts the same PVC.
 Deleting this PVC also deletes its local volume and the test file:
 
 ```bash
-kubectl delete -f projects/kubernetes-work/tasks/manifests/07-persistent-storage.yaml
+kubectl delete -f kubernetes/tasks/07-persistent-storage/manifest.yaml
 ```
 
 The local volume can be lost if the Docker Desktop cluster is reset or removed. Keep a separate backup for important data.

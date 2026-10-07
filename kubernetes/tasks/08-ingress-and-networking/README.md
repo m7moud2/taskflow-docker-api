@@ -7,7 +7,7 @@ The Ingress controller is installed in the Docker Desktop cluster as the `traefi
 ## 1. Create the route
 
 ```bash
-kubectl apply -f projects/kubernetes-work/tasks/manifests/08-web-ingress.yaml
+kubectl apply -f kubernetes/tasks/08-ingress-and-networking/manifest.yaml
 kubectl get ingress -n kubernetes-work
 kubectl describe ingress web -n kubernetes-work
 ```
@@ -33,5 +33,5 @@ This uses a local port-forward, so it does not expose the app to the internet. T
 ## Clean up
 
 ```bash
-kubectl delete -f projects/kubernetes-work/tasks/manifests/08-web-ingress.yaml
+kubectl delete -f kubernetes/tasks/08-ingress-and-networking/manifest.yaml
 ```

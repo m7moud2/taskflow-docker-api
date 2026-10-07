@@ -18,7 +18,7 @@ The Secret manifest is generated locally and is not stored in this repository.
 ## 2. Start the demo
 
 ```bash
-kubectl apply -f projects/kubernetes-work/tasks/manifests/05-config-demo.yaml
+kubectl apply -f kubernetes/tasks/05-configuration-and-secrets/manifest.yaml
 kubectl rollout status deployment/config-demo -n kubernetes-work
 ```
 
@@ -35,6 +35,6 @@ ConfigMaps are for non-sensitive configuration. Kubernetes Secret values are bas
 ## Clean up
 
 ```bash
-kubectl delete -f projects/kubernetes-work/tasks/manifests/05-config-demo.yaml
+kubectl delete -f kubernetes/tasks/05-configuration-and-secrets/manifest.yaml
 kubectl delete secret app-credentials -n kubernetes-work
 ```

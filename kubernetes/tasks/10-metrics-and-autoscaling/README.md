@@ -19,7 +19,7 @@ Metrics Server supplies recent CPU and memory metrics for `kubectl top` and the 
 The `web` Deployment has CPU requests, which the HPA needs to calculate CPU utilization:
 
 ```bash
-kubectl apply -f projects/kubernetes-work/tasks/manifests/10-web-hpa.yaml
+kubectl apply -f kubernetes/tasks/10-metrics-and-autoscaling/manifest.yaml
 kubectl get hpa web -n kubernetes-work
 kubectl describe hpa web -n kubernetes-work
 ```
@@ -69,7 +69,7 @@ kubectl delete namespace monitoring
 ## Clean up the HPA
 
 ```bash
-kubectl delete -f projects/kubernetes-work/tasks/manifests/10-web-hpa.yaml
+kubectl delete -f kubernetes/tasks/10-metrics-and-autoscaling/manifest.yaml
 ```
 
 An HPA changes replica count based on metrics. Prometheus and Grafana provide dashboards, history, and alerting. They solve different problems.
